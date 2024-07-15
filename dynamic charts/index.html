@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <!-- Script to handle window load event -->
+  <script type="text/javascript">
+    window.onload = function () {
+      // Initialize an empty array for data points
+      var dps = [];  // dataPoints
+
+      // Create a new CanvasJS chart
+      var chart = new CanvasJS.Chart("chartContainer", {
+        exportEnabled: true, // Enable chart export functionality
+        theme: "dark2", // Set chart theme
+        title: {
+          text: "Live Data" // Set chart title
+        },
+        axisX: {
+          title: "Time" // Set X-axis title
+        },
+        axisY: {
+          title: "Value" // Set Y-axis title
+        },
+        data: [{
+          type: "spline", // Set chart type to spline (smooth line)
+          dataPoints: dps // Set data points array
+        }]
+      });
+
+      // Function to update the chart with new data
+      var updateChart = function () {
+        // Fetch data from the server
+        fetch('http://localhost:3000/data')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok ' + response.statusText); // Handle network errors
+            }
+            return response.json(); // Parse JSON data
+          })
+          .then(data => {
+            dps.length = 0;  // Clear existing data points
+            // Add new data points to the array
+            data.forEach(point => {
+              dps.push({ x: point.x, y: point.y });
+            });
+            // Render the chart with updated data
+            chart.render();
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error); // Handle fetch errors
+          });
+      };
+
+      // Initial chart update
+      updateChart();
+      // Set interval to update the chart every second
+      setInterval(updateChart, 1000);  // Update chart every second
+    }
+  </script>
+  <!-- Include CanvasJS library -->
+  <script type="text/javascript" src="canvasjs.min.js"></script>
+</head>
+<body>
+  <!-- Container for the chart -->
+  <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+</body>
+</html>

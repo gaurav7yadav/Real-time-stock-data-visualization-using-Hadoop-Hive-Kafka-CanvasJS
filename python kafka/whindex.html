@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<script>
+window.onload = function () {
+    var temperatureData = [];
+    var humidityData = [];
+    var pressureData = [];
+    var windSpeedData = [];
+
+    var chart = new CanvasJS.Chart("chartContainer", {
+        title: {
+            text: "Real-time Weather Data"
+        },
+        axisX: {
+            title: "Time"
+        },
+        axisY: [{
+            title: "Temperature (°C)",
+            lineColor: "#F08080",
+            tickColor: "#F08080",
+            labelFontColor: "#F08080",
+            titleFontColor: "#F08080"
+        }, {
+            title: "Humidity (%)",
+            lineColor: "#20B2AA",
+            tickColor: "#20B2AA",
+            labelFontColor: "#20B2AA",
+            titleFontColor: "#20B2AA",
+            opposite: true
+        }, {
+            title: "Pressure (hPa)",
+            lineColor: "#87CEEB",
+            tickColor: "#87CEEB",
+            labelFontColor: "#87CEEB",
+            titleFontColor: "#87CEEB",
+            opposite: true
+        }, {
+            title: "Wind Speed (m/s)",
+            lineColor: "#FFD700",
+            tickColor: "#FFD700",
+            labelFontColor: "#FFD700",
+            titleFontColor: "#FFD700",
+            opposite: true
+        }],
+        data: [{
+            type: "line",
+            name: "Temperature",
+            showInLegend: true,
+            dataPoints: temperatureData,
+            axisYType: "primary"
+        }, {
+            type: "line",
+            name: "Humidity",
+            showInLegend: true,
+            dataPoints: humidityData,
+            axisYType: "secondary"
+        }, {
+            type: "line",
+            name: "Pressure",
+            showInLegend: true,
+            dataPoints: pressureData,
+            axisYType: "tertiary"
+        }, {
+            type: "line",
+            name: "Wind Speed",
+            showInLegend: true,
+            dataPoints: windSpeedData,
+            axisYType: "quaternary"
+        }]
+    });
+
+    var updateChart = function () {
+        fetch('http://127.0.0.1:5000/data')
+            .then(response => response.json())
+            .then(data => {
+                temperatureData.length = 0;
+                humidityData.length = 0;
+                pressureData.length = 0;
+                windSpeedData.length = 0;
+
+                data.forEach(point => {
+                    var time = new Date(point.timestamp * 1000);
+                    temperatureData.push({ x: time, y: point.temperature });
+                    humidityData.push({ x: time, y: point.humidity });
+                    pressureData.push({ x: time, y: point.pressure });
+                    windSpeedData.push({ x: time, y: point.wind_speed });
+                });
+                chart.render();
+            });
+    };
+
+    setInterval(updateChart, 60000); // Update chart every minute
+    updateChart(); // Initial call to update chart
+}
+</script>
+</head>
+<body>
+<div id="chartContainer" style="height: 400px; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</body>
+</html>

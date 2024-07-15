@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <script type="text/javascript">
+    window.onload = function () {
+      var dpsSpline = [];  // dataPoints for spline chart
+      var dpsLine = [];    // dataPoints for line chart
+      var dpsBar = [];     // dataPoints for bar chart
+      var dpsPie = [];     // dataPoints for pie chart
+
+      var splineChart = new CanvasJS.Chart("splineChartContainer", {
+        exportEnabled: true,
+        theme: "dark2",
+        title: {
+          text: "Spline Chart"
+        },
+        axisX: {
+          title: "Time"
+        },
+        axisY: {
+          title: "Value"
+        },
+        data: [{
+          type: "spline",
+          dataPoints: dpsSpline
+        }]
+      });
+
+      var lineChart = new CanvasJS.Chart("lineChartContainer", {
+        exportEnabled: true,
+        theme: "dark2",
+        title: {
+          text: "Line Chart"
+        },
+        axisX: {
+          title: "Time"
+        },
+        axisY: {
+          title: "Value"
+        },
+        data: [{
+          type: "line",
+          dataPoints: dpsLine
+        }]
+      });
+
+      var barChart = new CanvasJS.Chart("barChartContainer", {
+        exportEnabled: true,
+        theme: "dark2",
+        title: {
+          text: "Bar Chart"
+        },
+        axisX: {
+          title: "Time"
+        },
+        axisY: {
+          title: "Value"
+        },
+        data: [{
+          type: "column",
+          dataPoints: dpsBar
+        }]
+      });
+
+      var pieChart = new CanvasJS.Chart("pieChartContainer", {
+        exportEnabled: true,
+        theme: "dark2",
+        title: {
+          text: "Pie Chart"
+        },
+        data: [{
+          type: "pie",
+          dataPoints: dpsPie
+        }]
+      });
+
+      var updateCharts = function () {
+        fetch('http://localhost:3000/data')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+          })
+          .then(data => {
+            dpsSpline.length = 0;  // Clear existing data points for each chart
+            dpsLine.length = 0;
+            dpsBar.length = 0;
+            dpsPie.length = 0;
+
+            data.forEach(point => {
+              dpsSpline.push({ x: point.x, y: point.y });
+              dpsLine.push({ x: point.x, y: point.y });
+              dpsBar.push({ x: point.x, y: point.y });
+            });
+
+            // For pie chart, aggregate data points into a single category
+            var totalValue = data.reduce((sum, point) => sum + point.y, 0);
+            dpsPie.push({ y: totalValue, label: "Total" });
+
+            splineChart.render();
+            lineChart.render();
+            barChart.render();
+            pieChart.render();
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error);
+          });
+      };
+
+      updateCharts();
+      setInterval(updateCharts, 1000);  // Update charts every second
+    }
+  </script>
+  <script type="text/javascript" src="canvasjs.min.js"></script>
+</head>
+<body>
+  <div id="splineChartContainer" style="height: 300px; width: 100%;"></div>
+  <div id="lineChartContainer" style="height: 300px; width: 100%;"></div>
+  <div id="barChartContainer" style="height: 300px; width: 100%;"></div>
+  <div id="pieChartContainer" style="height: 300px; width: 100%;"></div>
+</body>
+</html>

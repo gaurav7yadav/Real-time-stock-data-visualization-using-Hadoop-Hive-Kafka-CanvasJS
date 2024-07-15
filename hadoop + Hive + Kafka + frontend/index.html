@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<script>
+window.onload = function () {
+    var dataPoints = [];
+
+    var chart = new CanvasJS.Chart("chartContainer", {
+        exportEnabled: true,
+        title: {
+            text: "Real-time Air Quality Index"
+        },
+        data: [{
+            type: "line",
+            dataPoints: dataPoints
+        }]
+    });
+
+    var updateChart = function () {
+        fetch('http://127.0.0.1:5000/data')
+            .then(response => response.json())
+            .then(data => {
+                dataPoints.length = 0;
+                data.forEach(point => {
+                    dataPoints.push({ x: new Date(point.timestamp * 1000), y: point.aqi });
+                });
+                chart.render();
+            });
+    };
+
+    setInterval(updateChart, 1000); // Update chart every second
+}
+</script>
+</head>
+<body>
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+<script src="canvasjs.min.js"></script>
+</body>
+</html>

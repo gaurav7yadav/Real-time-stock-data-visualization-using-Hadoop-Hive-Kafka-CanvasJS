@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<script type="text/javascript" src="jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="canvasjs.stock.min.js"></script>
+<script type="text/javascript">
+window.onload = function () {
+  var dataPoints1 = [], dataPoints2 = [];
+  var stockChart = new CanvasJS.StockChart("chartContainer",{
+    theme: "light2",
+    exportEnabled: true,
+    title:{
+      text:"Gaurav Stock CHart"
+    },
+    charts: [{
+      axisY: {
+        prefix: "$"
+      },
+      data: [{
+        type: "candlestick",
+        yValueFormatString: "$#,###.00",
+        dataPoints : dataPoints1
+      }]
+    }],
+    navigator: {
+      data: [{
+        color: "#6D78AD",
+        dataPoints: dataPoints2
+      }],
+      slider: {
+        minimum: new Date(2018, 2, 1), // Months are 0-indexed (March is 2)
+        maximum: new Date(2018, 5, 30) // End of June
+      }
+    }
+  });
+  $.getJSON("http://localhost:3000/data", function(data) {
+    for(var i = 0; i < data.length; i++){
+      dataPoints1.push({x: new Date(data[i].date), y: [Number(data[i].open), Number(data[i].high), Number(data[i].low), Number(data[i].close)]});
+      dataPoints2.push({x: new Date(data[i].date), y: Number(data[i].close)});
+    }
+    stockChart.render();
+  });
+}
+</script>
+</head>
+<body>
+<div id="chartContainer" style="height: 400px; max-width: 920px; margin: 0px auto;"></div>
+</body>
+</html>
